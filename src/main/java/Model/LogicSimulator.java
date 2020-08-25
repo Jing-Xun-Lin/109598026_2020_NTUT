@@ -1,6 +1,5 @@
 package Model;
 
-import javax.xml.bind.util.ValidationEventCollector;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
@@ -13,6 +12,22 @@ public class LogicSimulator
     private Vector<Device> oPins = new Vector<>();
     private Vector<String> pinConnections = new Vector<>();
     private int circuitSize;
+
+    private void addGate(String str)
+    {
+        if (str.equals("1"))
+        {
+            circuits.add(new GateAND());
+        }
+        else if (str.equals("2"))
+        {
+            circuits.add(new GateOR());
+        }
+        else
+        {
+            circuits.add(new GateNOT());
+        }
+    }
 
     private void buildGates(String data, int counter)
     {
@@ -32,36 +47,30 @@ public class LogicSimulator
                 int circuitIndex = counter - 3;
                 if (str.matches("[1-3]{1}"))
                 {
-                    if (str.equals("1"))
-                    {
-                        circuits.add(new GateAND());
-                    }
-                    else if (str.equals("2"))
-                    {
-                        circuits.add(new GateOR());
-                    }
-                    else
-                    {
-                        circuits.add(new GateNOT());
-                    }
+                    addGate(str);
                 }
                 else if (str.matches("[1-9]\\d*\\.1"))
                 {
                     String inputDeviceIndex = String.valueOf(circuitIndex);
                     String outputDeviceIndex = String.valueOf(Integer.parseInt(str.replace(".1", "")) - 1);
                     pinConnections.add(outputDeviceIndex + "." + inputDeviceIndex);
-//                    int inputDeviceIndex = Integer.parseInt(str.replace(".1", "")) - 1;
-//                    circuits.get(circuitIndex).addInputPin(circuits.get(inputDeviceIndex));
                 }
                 else if (str.matches("-[1-9]\\d*"))
                 {
                     int iPinIndex = Math.abs(Integer.parseInt(str)) - 1;
-                    iPins.set(iPinIndex, new IPin());
+                    if (iPins.get(iPinIndex) == null)
+                    {
+                        iPins.set(iPinIndex, new IPin());
+                    }
                     circuits.get(circuitIndex).addInputPin(iPins.get(iPinIndex));
                 }
                 else if (str.equals("0"))
                 {
                     return;
+                }
+                else
+                {
+                    throw new RuntimeException("input data error");
                 }
             }
         }
@@ -111,7 +120,7 @@ public class LogicSimulator
         }
     }
 
-    public void setAllInput(Vector<Boolean> inputValues)
+    private void setInput(Vector<Boolean> inputValues)
     {
         for (int i = 0; i < inputValues.size(); i++)
         {
@@ -119,7 +128,7 @@ public class LogicSimulator
         }
     }
 
-    public String getTruthTableHeader()
+    private String getTruthTableHeader()
     {
         StringBuilder iString = new StringBuilder();
         StringBuilder iAmountString = new StringBuilder();
@@ -147,14 +156,9 @@ public class LogicSimulator
         return header;
     }
 
-    public String getSimulationResult(Vector<Boolean> inputValues)
+    private StringBuilder getInputValueRow(Vector<Boolean> inputValues)
     {
-        setAllInput(inputValues);
-
         StringBuilder iValueString = new StringBuilder();
-        StringBuilder oValueString = new StringBuilder();
-        String truthTableHeader = getTruthTableHeader();
-        String result = "";
 
         for (boolean value: inputValues)
         {
@@ -168,6 +172,13 @@ public class LogicSimulator
             }
         }
 
+        return iValueString;
+    }
+
+    private StringBuilder getOutputValueRow()
+    {
+        StringBuilder oValueString = new StringBuilder();
+
         for (Device output: oPins)
         {
             if (output.getOutput())
@@ -180,8 +191,50 @@ public class LogicSimulator
             }
         }
 
+        return oValueString;
+    }
+
+    public String getSimulationResult(Vector<Boolean> inputValues)
+    {
+        setInput(inputValues);
+
+        StringBuilder iValueString = getInputValueRow(inputValues);
+        StringBuilder oValueString = getOutputValueRow();
+        String truthTableHeader = getTruthTableHeader();
+        String result = "";
+
         result = "Simulation Result:\n" + truthTableHeader + iValueString + "|" + oValueString + "\n";
 
+        return result;
+    }
+
+    private boolean intToBoolean(int n)
+    {
+        return n == 1;
+    }
+
+    public String getTruthTable()
+    {
+        int rows = (int) Math.pow(2, iPins.size());
+        Vector<Boolean> inputValues = new Vector<>();
+        String truthTableHeader = getTruthTableHeader();
+        StringBuilder truthTable = new StringBuilder();
+        String result = "";
+
+        for (int i = 0; i < rows; i++)
+        {
+            inputValues = new Vector<>();
+            for (int j = iPins.size() - 1; j >= 0; j--)
+            {
+                inputValues.add(intToBoolean((i / (int) Math.pow(2, j)) % 2));
+            }
+            setInput(inputValues);
+            StringBuilder iValueString = getInputValueRow(inputValues);
+            StringBuilder oValueString = getOutputValueRow();
+            truthTable.append(iValueString).append("|").append(oValueString).append("\n");
+        }
+
+        result = "Truth table:\n" + truthTableHeader + truthTable;
         return result;
     }
 }
