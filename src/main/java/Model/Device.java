@@ -5,6 +5,7 @@ import java.util.Vector;
 public class Device
 {
     public Vector<Device> iPins = new Vector<>();
+    public boolean isOutput = true;
 
     public void addInputPin(Device device)
     {
