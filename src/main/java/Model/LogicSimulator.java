@@ -1,5 +1,6 @@
 package Model;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
@@ -11,7 +12,21 @@ public class LogicSimulator
     private Vector<Device> iPins = new Vector<>();
     private Vector<Device> oPins = new Vector<>();
     private Vector<String> pinConnections = new Vector<>();
-    private int circuitSize;
+
+    public Vector<Device> getCircuits()
+    {
+        return circuits;
+    }
+
+    public Vector<Device> getIPins()
+    {
+        return iPins;
+    }
+
+    public Vector<Device> getOPins()
+    {
+        return oPins;
+    }
 
     private void addGate(String str)
     {
@@ -35,10 +50,6 @@ public class LogicSimulator
         if (counter == 1)
         {
             iPins.setSize(Integer.parseInt(dataset[0]));
-        }
-        else if (counter == 2)
-        {
-            circuitSize = Integer.parseInt(dataset[0]);
         }
         else
         {
@@ -90,11 +101,13 @@ public class LogicSimulator
 
     public boolean load(String filePath)
     {
-        try {
+        try
+        {
             File myFile = new File(filePath);
             Scanner myReader = new Scanner(myFile);
             int counter = 0;
-            while (myReader.hasNextLine()) {
+            while (myReader.hasNextLine())
+            {
                 counter++;
                 String data = myReader.nextLine();
                 buildGates(data, counter);
@@ -102,9 +115,10 @@ public class LogicSimulator
             myReader.close();
             connectDevices();
             setOutputPins();
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found.");
-            e.printStackTrace();
+        }
+        catch (FileNotFoundException e)
+        {
+            return false;
         }
         return true;
     }
