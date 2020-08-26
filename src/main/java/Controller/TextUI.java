@@ -2,12 +2,14 @@ package Controller;
 
 import Model.LogicSimulator;
 
+import java.awt.*;
 import java.util.Scanner;
 import java.util.Vector;
 
 public class TextUI
 {
-    private LogicSimulator logicSimulator;
+    private LogicSimulator logicSimulator = new LogicSimulator();
+
     public void displayMenu()
     {
         System.out.println();
@@ -18,9 +20,11 @@ public class TextUI
         System.out.print("Command: ");
     }
 
-    private void processCommand1(Scanner scanner)
+    private void processCommand1()
     {
+        Scanner scanner = new Scanner(System.in);
         logicSimulator = new LogicSimulator();
+
         System.out.print("Please key in a file path: ");
         String path = scanner.nextLine();
         if (logicSimulator.load(path))
@@ -34,8 +38,10 @@ public class TextUI
         }
     }
 
-    private void processCommand2(Scanner scanner)
+    private void processCommand2()
     {
+        Scanner scanner = new Scanner(System.in);
+
         if (!logicSimulator.getCircuits().isEmpty()) {
             int index = 0;
             Vector<Boolean> inputValues = new Vector<>();
@@ -68,37 +74,48 @@ public class TextUI
         }
     }
 
-    public void processCommand(String command)
+    private void processCommand3()
     {
-        Scanner scanner = new Scanner(System.in);
-
-        if (command.equals("1"))
+        if (!logicSimulator.getCircuits().isEmpty())
         {
-            processCommand1(scanner);
-        }
-        else if (command.equals("2"))
-        {
-            processCommand2(scanner);
-        }
-        else if (command.equals("3"))
-        {
-            if (!logicSimulator.getCircuits().isEmpty())
-            {
-                System.out.print(logicSimulator.getTruthTable());
-            }
-            else
-            {
-                System.out.println("Please load an icf file, before using this operation.");
-            }
-        }
-        else if (command.equals("4"))
-        {
-            System.out.println("Goodbye, thanks for using LS.");
-            return;
+            System.out.print(logicSimulator.getTruthTable());
         }
         else
         {
-            System.out.println("invalid input");
+            System.out.println("Please load an icf file, before using this operation.");
+        }
+    }
+
+    public void processCommand()
+    {
+        Scanner scanner = new Scanner(System.in);
+        String command = "";
+
+        while (!command.equals("4"))
+        {
+            displayMenu();
+            command = scanner.nextLine();
+
+            if (command.equals("1"))
+            {
+                processCommand1();
+            }
+            else if (command.equals("2"))
+            {
+                processCommand2();
+            }
+            else if (command.equals("3"))
+            {
+                processCommand3();
+            }
+            else if (command.equals("4"))
+            {
+                System.out.println("Goodbye, thanks for using LS.");
+            }
+            else
+            {
+                System.out.println("invalid input");
+            }
         }
     }
 }
