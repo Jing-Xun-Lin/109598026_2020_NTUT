@@ -51,7 +51,7 @@ public class LogicSimulator
         {
             iPins.setSize(Integer.parseInt(dataset[0]));
         }
-        else
+        else if (counter > 2)
         {
             for (String str: dataset)
             {
